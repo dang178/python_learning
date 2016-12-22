@@ -23,12 +23,43 @@ class homework:
 #获取有作业的md5值方法
 def GetFileMD5(list_file_dir):
 	dic_file_md5=dict()	#所有文件的md5码
+	#print("主目录："+list_file_dir)
 	for file_dir in list_file_dir:
+		#print("文件路径:"+file_dir)
 		if(os.path.isfile(file_dir)):
 			obj_file=open(file_dir,'rb')
 			dic_file_md5[file_dir]=hashlib.new('md5',obj_file.read()).hexdigest() 
 	return dic_file_md5
 
+def GetAllFileDir(path_name):#获取当前文件夹所有的文件全路径
+	for file_dir in os.listdir(path_name):
+		try:
+			midPath2=path_name+'\\'+file_dir
+			#print("当前文件夹下的路径："+midPath2)
+			if(os.path.isfile(midPath2)):
+				compressType=CheckIsCompress(midPath2)
+				if(compressType==""):
+					if(os.path.isfile(midPath2)):
+						list_file_dir.append(midPath2)
+				else:	#若文件为压缩文件
+					#print("解压"+midPath2+"开始...,解压路径："+path_name)
+					if(compressType==".rar"):
+						un_rar(midPath2,path_name)
+					elif(compressType==".zip"):
+						un_zip(midPath2,path_name)
+					elif(compressType==".tar"):
+						un_tar(midPath2,path_name)
+					elif(compressType==".gzip"):
+						un_gz(midPath2)
+					os.remove(midPath2)
+					GetAllFileDir(midPath2)
+				#print midPath2
+			else:
+				GetAllFileDir(midPath2)
+		except BaseException:
+			print("exception")
+	return list_file_dir
+	
 #查找列表中相同MD5值的数据
 def CheckFileIsRepeat(dic_file_md5):
 	list_homework=[]
@@ -81,8 +112,8 @@ def un_zip(file_name,uz_folder):	#解压zip文件，第二个参数为解压目录
 
 def un_rar(file_name,uz_folder):	#解压rar文件，第二个参数为解压目录
 	rar	= rarfile.RarFile(file_name)
-	print(rar.getinfo())
 	#os.chdir()
+	#print("目标路径："+uz_folder)
 	rar.extractall(uz_folder)
 	rar.close()
 
@@ -90,34 +121,12 @@ def CheckIsCompress(file_name):	#检查是否该文件是压缩文件
 	rar_files=[".gzip",".tar",".zip",".rar"]
 	isCompress=""
 	for rar_file in rar_files:
-		print("判断压缩文件"+file_name+"类型："+rar_file)
-		print(file_name.find(rar_file))
+		#print("判断压缩文件"+file_name+"类型："+rar_file)
+		#print(file_name.find(rar_file))
 		if(file_name.find(rar_file)>=0):
 			isCompress=rar_file
 			break
 	return isCompress
-
-def GetAllFileDir(path_name):#获取当前文件夹所有的文件全路径
-	for file_dir in os.listdir(path_name):
-		midPath2=path_name+'\\'+file_dir
-		if(os.path.isfile(midPath2)):
-			compressType=CheckIsCompress(midPath2)
-			if(compressType==""):
-				list_file_dir.append(midPath2)
-			else:	#若文件为压缩文件
-				print("解压"+midPath2+"开始...,解压路径："+path_name)
-				if(compressType==".rar"):
-					un_rar(midPath2,path_name)
-				elif(compressType==".zip"):
-					un_zip(midPath2,path_name)
-				elif(compressType==".tar"):
-					un_tar(midPath2,path_name)
-				elif(compressType==".gzip"):
-					un_gz(midPath2)
-				os.remove(midPath2)
-				GetAllFileDir(path_name)
-			#print midPath2
-	return list_file_dir
 
 base_dir='D:\homework'
 list_dir=[]
