@@ -1,0 +1,12 @@
+#__*__coding:utf-8__*__
+num1=float(input("请输入第一个数："))
+num2=float(input("请输入第二个数："))
+sums=num1+num2
+diff=num1-num2
+pro=num1*num2
+print(str(num1)+"+"+str(num2)+"="+str(sums))
+print(str(num1)+"-"+str(num2)+"="+str(diff))
+print(str(num1)+"*"+str(num2)+"="+str(pro))
+if(num2!=0):
+    quot=num1/num2
+    print(str(num1)+"/"+str(num2)+"="+str(quot))
