@@ -1,6 +1,6 @@
-# __*__ coding:UTF-8 __*__
+# __*__ coding:utf-8 __*__
 
-import os,sys,hashlib
+import os,sys,hashlib,re
 import random,gzip,tarfile
 import zipfile,rarfile
 
@@ -25,10 +25,13 @@ def GetFileMD5(list_file_dir):
 	dic_file_md5=dict()	#所有文件的md5码
 	#print("主目录："+list_file_dir)
 	for file_dir in list_file_dir:
-		#print("文件路径:"+file_dir)
-		if(os.path.isfile(file_dir)):
-			obj_file=open(file_dir,'rb')
-			dic_file_md5[file_dir]=hashlib.new('md5',obj_file.read()).hexdigest() 
+		try:
+			#print("文件路径:"+file_dir)
+			if(os.path.isfile(file_dir)):
+				obj_file=open(file_dir,'rb')
+				dic_file_md5[file_dir]=hashlib.new('md5',obj_file.read()).hexdigest() 
+		except BaseException:
+			continue
 	return dic_file_md5
 
 def GetAllFileDir(path_name):#获取当前文件夹所有的文件全路径
@@ -42,7 +45,7 @@ def GetAllFileDir(path_name):#获取当前文件夹所有的文件全路径
 					if(os.path.isfile(midPath2)):
 						list_file_dir.append(midPath2)
 				else:	#若文件为压缩文件
-					#print("解压"+midPath2+"开始...,解压路径："+path_name)
+					print("解压"+midPath2+"开始...,解压路径："+path_name)
 					if(compressType==".rar"):
 						un_rar(midPath2,path_name)
 					elif(compressType==".zip"):
@@ -53,20 +56,22 @@ def GetAllFileDir(path_name):#获取当前文件夹所有的文件全路径
 						un_gz(midPath2)
 					os.remove(midPath2)
 					GetAllFileDir(midPath2)
-				#print midPath2
+					#print(midPath2)
 			else:
 				GetAllFileDir(midPath2)
 		except BaseException:
-			print("exception")
+			continue
+			#print("exception")
 	return list_file_dir
 	
 #查找列表中相同MD5值的数据
 def CheckFileIsRepeat(dic_file_md5):
 	list_homework=[]
+	mode=re.compile(r'\d{8}')
 	for i in range(0,len(dic_file_md5.keys())-1):
 		dic_file_key=list(dic_file_md5.keys())[i]
 		c=homework()
-		c.student_num=dic_file_key.split('\\')[-2]
+		c.student_num=mode.findall(dic_file_key)[0]
 		c.file_md5=dic_file_md5[dic_file_key]
 		#print '开始判断'+dic_file_key
 		for j in range(i+1,len(dic_file_md5.keys())-1):
@@ -128,7 +133,7 @@ def CheckIsCompress(file_name):	#检查是否该文件是压缩文件
 			break
 	return isCompress
 
-base_dir='D:\homework'
+base_dir='E:\homework'
 list_dir=[]
 for path_name in os.listdir(base_dir):
 	midpath=base_dir+'\\'+path_name
@@ -140,7 +145,7 @@ for path_name in os.listdir(base_dir):
 list_file_dir=[]	#保存所有的文件路径
 for path_name in list_dir:	#遍历所有文件夹
 	#print path_name
-	print("当前遍历的学生为："+path_name)
+	#print("当前遍历的学生为："+path_name)
 	list_file_dir.append(GetAllFileDir(path_name))
 #print list_file_dir
 dic_file_md5=GetFileMD5(list_file_dir)	#所有文件的md5码
@@ -149,4 +154,4 @@ dic_file_md5=GetFileMD5(list_file_dir)	#所有文件的md5码
 list_homework=CheckFileIsRepeat(dic_file_md5)
 #print dic_file_repeat
 for obj_homework in list_homework:
-	print (obj_homework.student_num+',成绩：' +str(obj_homework.score))
+	print (obj_homework.student_num+',' +str(obj_homework.score))
